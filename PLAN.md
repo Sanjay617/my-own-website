@@ -76,10 +76,11 @@ my-own-website/
 │   └── resume.pdf          ← downloadable resume
 └── src/
     ├── data/resume.ts      ← all jobs, projects, skills, links (edit here)
-    └── app/
-        ├── layout.tsx      ← fonts, colors, page title
-        ├── page.tsx        ← puts the sections together
-        └── components/     ← Hero, Experience, Projects, Skills, Contact
+    ├── app/
+    │   ├── globals.css     ← colors (accent lives here)
+    │   ├── layout.tsx      ← fonts, page title
+    │   └── page.tsx        ← puts the sections together
+    └── components/         ← Nav, Hero, Experience, Projects, Skills, Contact
 ```
 
 ## 7. Build steps
