@@ -1,0 +1,12 @@
+# Contact info and links shown on the site.
+# Edit a value, push to GitHub, and Vercel updates the live site.
+# Keep values in quotes.
+
+email: "sanjaysubb2006@gmail.com"
+phone: "416-417-4309"
+github: "https://github.com/Sanjay617"
+linkedin: "https://www.linkedin.com/in/sanjay-subramanian-bb2615315/"
+
+# Optional. Put the PDF at public/resume.pdf, then uncomment this line
+# to show the Resume button and enable the `resume` terminal command.
+# resume: "/resume.pdf"

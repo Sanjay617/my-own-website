@@ -75,12 +75,13 @@ my-own-website/
 ├── public/
 │   └── resume.pdf          ← downloadable resume
 └── src/
-    ├── data/resume.ts      ← all jobs, projects, skills, links (edit here)
+    ├── data/contact.yaml   ← email, phone, GitHub, LinkedIn, resume link (edit here)
+    ├── data/resume.ts      ← jobs, projects, skills (edit here)
     ├── app/
     │   ├── globals.css     ← colors (accent lives here)
     │   ├── layout.tsx      ← fonts, page title
     │   └── page.tsx        ← puts the sections together
-    └── components/         ← Nav, Hero, Experience, Projects, Skills, Contact
+    └── components/         ← sections + Terminal, StatusBar, Typewriter
 ```
 
 ## 7. Build steps
@@ -117,8 +118,8 @@ flowchart LR
 
 ## 9. Placeholders to fill in
 
-- [ ] LinkedIn URL (placeholder for now)
-- [ ] GitHub URL (placeholder for now)
+- [x] LinkedIn URL
+- [x] GitHub URL
 - [ ] Resume PDF file
 - [ ] Project GitHub links / demo GIFs
 

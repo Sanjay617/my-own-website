@@ -1,16 +1,11 @@
-// All site content lives here. Edit this file to update the website.
+// Resume content for the site. Contact info and links live in contact.yaml.
 
-// TODO: replace the placeholder links with real URLs.
 export const profile = {
   name: "Sanjay Subramanian",
   tagline: "Backend + AI engineer @ Waterloo",
   education: "Bachelor of Mathematics in AI, Minor in Computer Science",
   school: "University of Waterloo",
   graduation: "Expected April 2029",
-  email: "sanjaysubb2006@gmail.com",
-  github: "https://github.com/your-username",
-  linkedin: "https://www.linkedin.com/in/your-profile",
-  resume: "/resume.pdf",
 };
 
 export type Job = {
@@ -69,10 +64,10 @@ export type Project = {
   date: string;
   tech: string[];
   highlights: string[];
-  link: string;
+  // Optional: add a public repo or demo URL to make the card clickable.
+  link?: string;
 };
 
-// TODO: replace the placeholder project links.
 export const projects: Project[] = [
   {
     name: "Offline Voice Assistant",
@@ -82,7 +77,6 @@ export const projects: Project[] = [
       "Event-driven pipeline with asyncio queues, achieving under 800ms end-to-end latency.",
       "Runs fully offline with faster-whisper for speech-to-text and Llama 3.2 via Ollama — no API costs.",
     ],
-    link: "https://github.com/your-username/offline-voice-assistant",
   },
   {
     name: "Personal Finance Tracker",
@@ -92,7 +86,6 @@ export const projects: Project[] = [
       "Full CRUD with AG Grid editable tables and real-time validation, cutting data entry errors by 25%.",
       "JWT auth with bcrypt hashing for 100+ accounts with row-level data isolation.",
     ],
-    link: "https://github.com/your-username/finance-tracker",
   },
 ];
 

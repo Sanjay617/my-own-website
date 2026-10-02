@@ -25,6 +25,20 @@ body {
   color: var(--color-foreground);
 }
 
+/* Faint grid behind the page, fading out toward the bottom. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse at top, black 10%, transparent 70%);
+}
+
 ::selection {
   background: color-mix(in srgb, var(--color-accent) 30%, transparent);
 }
