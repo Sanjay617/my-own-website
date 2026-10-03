@@ -2,35 +2,55 @@
 
 import { useEffect, useRef, useState } from "react";
 import { profile } from "@/data/resume";
-import type { Contact } from "@/data/contact";
+import type { Contact } from "@/data/config";
 
 const OPEN_EVENT = "terminal:open";
 const PROMPT = "guest@sanjbuilds:~$";
 const SECTIONS = ["experience", "projects", "skills", "contact"];
-const COMMANDS = ["help", "whoami", "ls", "cd", ...SECTIONS, "github", "linkedin", "email", "resume", "date", "echo", "clear", "exit"];
+const COMMANDS = ["help", "whoami", "ls", "cd", ...SECTIONS, "github", "linkedin", "email", "resume", "date", "echo", "ask", "clear", "exit"];
 
-const HELP = [
-  "  whoami      who I am",
-  "  ls          list sections",
-  "  cd <dir>    jump to a section (e.g. cd projects)",
-  "  github      open my GitHub",
-  "  linkedin    open my LinkedIn",
-  "  email       send me an email",
-  "  resume      open my resume",
-  "  date        current date and time",
-  "  clear       clear the screen",
-  "  exit        close the terminal (or press Esc)",
-  "",
-  "  tip: ↑/↓ for history, Tab to autocomplete",
-];
+export type ChatSettings = { enabled: boolean; maxQuestionChars: number; historyMessages: number };
 
-const WELCOME: Line[] = [
-  { kind: "out", text: "sanjbuilds terminal v1.0" },
-  { kind: "out", text: "Type 'help' to see available commands." },
-];
+function helpLines(chat: ChatSettings) {
+  return [
+    ...(chat.enabled
+      ? [
+          "  <question>  ask the AI anything about me",
+          "              e.g. has he used kubernetes?",
+          "  ask <q>     same thing, if your question starts with a command",
+        ]
+      : []),
+    "  whoami      who I am",
+    "  ls          list sections",
+    "  cd <dir>    jump to a section (e.g. cd projects)",
+    "  github      open my GitHub",
+    "  linkedin    open my LinkedIn",
+    "  email       send me an email",
+    "  resume      open my resume",
+    "  date        current date and time",
+    "  clear       clear the screen",
+    "  exit        close the terminal (or press Esc)",
+    "",
+    `  tip: ↑/↓ for history, Tab to autocomplete${chat.enabled ? ", Ctrl+C to stop an answer" : ""}`,
+  ];
+}
 
-type Line = { kind: "in" | "out"; text: string };
-type Result = { output: string[]; clear?: boolean; close?: boolean; action?: () => void };
+function welcomeLines(chat: ChatSettings): Line[] {
+  return [
+    { kind: "out", text: "sanjbuilds terminal v1.0" },
+    {
+      kind: "out",
+      text: chat.enabled
+        ? "Type 'help' for commands, or just ask a question about me."
+        : "Type 'help' to see available commands.",
+    },
+  ];
+}
+
+// "ai" lines are answers being streamed in from /api/chat.
+type Line = { kind: "in" | "out" | "ai"; text: string };
+type ChatMessage = { role: "user" | "assistant"; content: string };
+type Result = { output: string[]; clear?: boolean; close?: boolean; action?: () => void; ask?: string };
 
 export function openTerminal() {
   window.dispatchEvent(new Event(OPEN_EVENT));
@@ -54,18 +74,23 @@ function scrollTo(id: string) {
   document.getElementById(id)?.scrollIntoView();
 }
 
-function execute(input: string, contact: Contact): Result {
+function execute(input: string, contact: Contact, chat: ChatSettings): Result {
   const [rawCmd = "", ...args] = input.trim().split(/\s+/);
   const cmd = rawCmd.toLowerCase();
   const open = (url: string) => () => window.open(url, "_blank", "noopener,noreferrer");
 
+  // A command word followed by more words ("email address?") is a question,
+  // unless the command takes arguments (cd, echo, ask).
+  if (chat.enabled && args.length && !["cd", "echo", "ask"].includes(cmd)) {
+    return { output: [], ask: input.trim() };
+  }
   if (SECTIONS.includes(cmd)) return { output: [], close: true, action: () => scrollTo(cmd) };
 
   switch (cmd) {
     case "":
       return { output: [] };
     case "help":
-      return { output: HELP };
+      return { output: helpLines(chat) };
     case "whoami":
       return { output: [profile.name, profile.tagline, `${profile.education}, ${profile.school}`] };
     case "ls":
@@ -96,20 +121,28 @@ function execute(input: string, contact: Contact): Result {
       return { output: [], clear: true };
     case "exit":
       return { output: [], close: true };
+    case "ask":
+      if (!chat.enabled) return { output: ["ask: the AI is turned off right now"] };
+      return args.length ? { output: [], ask: args.join(" ") } : { output: ["usage: ask <question>"] };
     default:
+      // Anything that isn't a command is a question for the AI.
+      if (chat.enabled) return { output: [], ask: input.trim() };
       return { output: [`command not found: ${rawCmd}. Type 'help' to see commands.`] };
   }
 }
 
-export default function Terminal({ contact }: { contact: Contact }) {
+export default function Terminal({ contact, chat }: { contact: Contact; chat: ChatSettings }) {
   const [open, setOpen] = useState(false);
-  const [lines, setLines] = useState<Line[]>(WELCOME);
+  const [lines, setLines] = useState<Line[]>(() => welcomeLines(chat));
   const [value, setValue] = useState("");
   const [history, setHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState<number | null>(null);
+  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
+  const [busy, setBusy] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const returnFocus = useRef<HTMLElement | null>(null);
+  const request = useRef<AbortController | null>(null);
 
   // Open via openTerminal() or the ` key (unless typing in a field).
   useEffect(() => {
@@ -142,27 +175,79 @@ export default function Terminal({ contact }: { contact: Contact }) {
     bottomRef.current?.scrollIntoView({ block: "nearest" });
   }, [lines]);
 
-  const close = () => setOpen(false);
+  const close = () => {
+    request.current?.abort();
+    setOpen(false);
+  };
+
+  // Streams an answer from /api/chat into the last line of the terminal.
+  const ask = async (question: string) => {
+    if (question.length > chat.maxQuestionChars) {
+      setLines((l) => [...l, { kind: "out", text: `Please keep questions under ${chat.maxQuestionChars} characters.` }]);
+      return;
+    }
+    const messages: ChatMessage[] = [
+      ...chatHistory.slice(-(chat.historyMessages - 1)),
+      { role: "user", content: question },
+    ];
+    const controller = new AbortController();
+    request.current = controller;
+    setBusy(true);
+    setLines((l) => [...l, { kind: "ai", text: "" }]);
+    const show = (text: string) => setLines((l) => [...l.slice(0, -1), { kind: "ai", text }]);
+
+    let answer = "";
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages }),
+        signal: controller.signal,
+      });
+      const reader = res.body?.pipeThrough(new TextDecoderStream()).getReader();
+      while (reader) {
+        const { done, value: chunk } = await reader.read();
+        if (done) break;
+        answer += chunk;
+        show(answer);
+      }
+      if (!answer) show("No answer came back. Try asking again.");
+      else if (res.ok) {
+        setChatHistory((h) => [...h, { role: "user", content: question }, { role: "assistant", content: answer }]);
+      }
+    } catch {
+      show(controller.signal.aborted ? `${answer}^C` : "Couldn't reach the bot. Check your connection and try again.");
+    } finally {
+      request.current = null;
+      setBusy(false);
+    }
+  };
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (busy) return;
     const input = value;
     setValue("");
     setHistoryIndex(null);
     if (input.trim()) setHistory((h) => [...h, input]);
 
-    const result = execute(input, contact);
+    const result = execute(input, contact, chat);
     if (result.clear) {
       setLines([]);
+      setChatHistory([]);
       return;
     }
     setLines((l) => [...l, { kind: "in", text: input }, ...result.output.map((text) => ({ kind: "out" as const, text }))]);
     if (result.close) close();
     result.action?.();
+    if (result.ask) void ask(result.ask);
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "ArrowUp" && history.length) {
+    if (e.key === "c" && e.ctrlKey && busy) {
+      e.preventDefault();
+      request.current?.abort();
+    } else if (e.key === "ArrowUp" && history.length) {
       e.preventDefault();
       const i = historyIndex === null ? history.length - 1 : Math.max(0, historyIndex - 1);
       setHistoryIndex(i);
@@ -207,12 +292,19 @@ export default function Terminal({ contact }: { contact: Contact }) {
           </button>
         </div>
         <div className="h-80 overflow-y-auto p-4">
-          <div role="log">
+          <div role="log" aria-busy={busy}>
             {lines.map((l, i) => (
               <div key={i} className="whitespace-pre-wrap break-words">
                 {l.kind === "in" ? (
                   <>
                     <span className="text-accent">{PROMPT}</span> {l.text}
+                  </>
+                ) : l.kind === "ai" ? (
+                  <>
+                    <span className="text-accent" aria-hidden="true">
+                      &gt;{" "}
+                    </span>
+                    {l.text || (busy && i === lines.length - 1 ? <span className="text-muted">thinking…</span> : null)}
                   </>
                 ) : (
                   <span className="text-foreground/90">{l.text}</span>
@@ -220,7 +312,7 @@ export default function Terminal({ contact }: { contact: Contact }) {
               </div>
             ))}
           </div>
-          <form onSubmit={submit} className="flex gap-2">
+          <form onSubmit={submit} className={`flex gap-2 ${busy ? "opacity-50" : ""}`}>
             <span className="shrink-0 text-accent" aria-hidden="true">
               {PROMPT}
             </span>
@@ -229,7 +321,8 @@ export default function Terminal({ contact }: { contact: Contact }) {
               value={value}
               onChange={(e) => setValue(e.target.value)}
               onKeyDown={onKeyDown}
-              aria-label="Terminal command"
+              readOnly={busy}
+              aria-label={chat.enabled ? "Terminal command or question" : "Terminal command"}
               autoComplete="off"
               autoCapitalize="off"
               spellCheck={false}

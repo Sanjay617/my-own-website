@@ -1,5 +1,5 @@
 import { profile } from "@/data/resume";
-import { contact } from "@/data/contact";
+import { contact, chatbot } from "@/data/config";
 import TypedLines, { type TypedLine } from "./TypedLines";
 import { OpenTerminalButton } from "./Terminal";
 
@@ -42,7 +42,7 @@ export default function Hero() {
         </div>
         <OpenTerminalButton className="mt-6 font-mono text-xs text-muted transition hover:text-accent">
           tip: press <kbd className="rounded border border-border px-1.5 py-0.5 text-accent">`</kbd> or
-          click here to open the terminal
+          click here to open the terminal{chatbot.enabled ? " and ask me anything" : ""}
         </OpenTerminalButton>
       </TypedLines>
     </section>

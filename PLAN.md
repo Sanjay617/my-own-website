@@ -80,6 +80,9 @@ my-own-website/
 └── src/
     ├── data/config.yaml    ← all settings: contact links + chatbot (edit here)
     ├── data/resume.ts      ← jobs, projects, skills (edit here)
+    ├── data/about-me.md    ← extra facts for the chatbot (edit here)
+    ├── lib/chat/           ← chatbot: prompt, AI + backup switch, rate limits
+    ├── app/api/chat/       ← the /api/chat route
     ├── app/
     │   ├── globals.css     ← colors (accent lives here)
     │   ├── layout.tsx      ← fonts, page title
@@ -91,7 +94,7 @@ my-own-website/
 
 All important settings live in **one YAML file**, `src/data/config.yaml`. YAML is a plain settings format of `name: value` lines. To change something, I edit a value and push, and the site updates in about 30 seconds. No code changes needed.
 
-Today this file is `contact.yaml`. When the chatbot is built, it gets renamed to `config.yaml` and grows a `chatbot` section.
+Secret keys are listed (without values) in `.env.example`.
 
 ```yaml
 # Contact info and links shown on the site
@@ -234,13 +237,13 @@ These are the starting values. All of them can be changed in `config.yaml`.
 
 | Step | Who | Done when |
 |---|---|---|
-| 1. Get keys | Me (Sanjay) | Gemini key (Google AI Studio), Groq key, and Upstash Redis added in Vercel |
-| 2. Write `about-me.md` | Me (Sanjay), or Claude drafts it | Short file with extra facts |
-| 2b. `config.yaml` | Claude | `contact.yaml` renamed to `config.yaml` with a `chatbot` section, and the build fails clearly on bad values |
-| 3. `/api/chat` with backup switch | Claude | A question returns a streamed answer, and turning Gemini off makes Groq answer |
-| 4. Rate limits | Claude | The 11th question in an hour gets "slow down" |
-| 5. Terminal hookup | Claude | Typing a question in the terminal shows a streamed answer |
-| 6. Testing | Claude | Off-topic, made-up-fact, spam, and "Gemini down" cases behave as expected |
+| 1. Get keys ⏳ | Me (Sanjay) | Gemini key (Google AI Studio), Groq key, and Upstash Redis added in Vercel |
+| 2. Write `about-me.md` ⏳ | Me (Sanjay); starter file exists | Short file with extra facts |
+| 2b. `config.yaml` ✅ | Claude | `contact.yaml` renamed to `config.yaml` with a `chatbot` section, and the build fails clearly on bad values |
+| 3. `/api/chat` with backup switch ✅ | Claude | A question returns a streamed answer, and turning Gemini off makes Groq answer |
+| 4. Rate limits ✅ (needs Upstash to test) | Claude | The 11th question in an hour gets "slow down" |
+| 5. Terminal hookup ✅ | Claude | Typing a question in the terminal shows a streamed answer |
+| 6. Testing ⏳ (real answers need keys) | Claude | Off-topic, made-up-fact, spam, and "Gemini down" cases behave as expected |
 
 ### Decisions made
 

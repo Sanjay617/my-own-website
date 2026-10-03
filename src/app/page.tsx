@@ -1,5 +1,5 @@
 import { profile } from "@/data/resume";
-import { contact } from "@/data/contact";
+import { contact, chatbot } from "@/data/config";
 import Nav from "@/components/Nav";
 import Hero from "@/components/Hero";
 import Experience from "@/components/Experience";
@@ -25,7 +25,14 @@ export default function Home() {
         © {new Date().getFullYear()} {profile.name}
       </footer>
       <StatusBar />
-      <Terminal contact={contact} />
+      <Terminal
+        contact={contact}
+        chat={{
+          enabled: chatbot.enabled,
+          maxQuestionChars: chatbot.limits.max_question_chars,
+          historyMessages: chatbot.limits.history_messages,
+        }}
+      />
       <ConsoleGreeting repo={`${contact.github}/my-own-website`} />
     </>
   );

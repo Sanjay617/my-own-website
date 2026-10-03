@@ -1,4 +1,4 @@
-import { contact } from "@/data/contact";
+import { contact } from "@/data/config";
 import Section from "./Section";
 
 const links = [

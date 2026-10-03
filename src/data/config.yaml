@@ -1,0 +1,39 @@
+# All site settings. Edit a value, push to GitHub, and Vercel updates the
+# live site. If a value is missing or the wrong type, the build fails and
+# names the bad line instead of publishing a broken site.
+#
+# NO SECRETS HERE: this repo is public. API keys go in Vercel →
+# Settings → Environment Variables (and .env.local on your laptop).
+
+# Contact info and links shown on the site. Keep values in quotes.
+contact:
+  email: "sanjaysubb2006@gmail.com"
+  phone: "416-417-4309"
+  github: "https://github.com/Sanjay617"
+  linkedin: "https://www.linkedin.com/in/sanjay-subramanian-bb2615315/"
+  # Optional. Put the PDF at public/resume.pdf, then uncomment this line
+  # to show the Resume button and enable the `resume` terminal command.
+  # resume: "/resume.pdf"
+
+# "Ask my resume" chatbot inside the terminal.
+chatbot:
+  enabled: true # false = hide the AI; the terminal still works
+
+  # Tried first. "gemini-flash-lite-latest" always points to Google's
+  # newest Flash-Lite model, so retirements don't break the bot.
+  main:
+    provider: "gemini" # gemini | groq
+    model: "gemini-flash-lite-latest"
+
+  # Used when the main AI is busy, down, or slow to start answering.
+  backup:
+    provider: "groq" # gemini | groq
+    model: "openai/gpt-oss-120b"
+
+  limits:
+    max_question_chars: 300 # longest question allowed
+    history_messages: 6 # how many past messages the AI remembers
+    per_visitor_per_hour: 10 # stops one person spamming
+    site_per_day: 500 # stays under the free daily allowance
+    max_answer_words: 300 # keeps answers short
+    first_word_timeout_seconds: 8 # main AI this slow → switch to backup
