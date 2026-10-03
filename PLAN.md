@@ -20,7 +20,8 @@ A site that tells a visitor in about 30 seconds:
 | Address | **sanjbuilds.com** (Cloudflare Registrar, $10.46/yr) | Short, brandable, at-cost pricing. DNS records point to Vercel. |
 | Repo | Public on GitHub | Recruiters can see the code. |
 | Theme | Dark and techy, **cyan** accent | Can be changed later from one place. |
-| Content | `resume.ts` for resume, `contact.yaml` for links | Adding a job means editing one list, not the page layout. |
+| Content | `resume.ts` for resume, `config.yaml` for all settings | Adding a job means editing one list. Changing a link, phone number, or chatbot limit means editing one value. |
+| Settings | One YAML file (`config.yaml`), no secrets in it | One place to change things without touching code. Secret keys stay in Vercel. |
 | Chatbot | Free AI (Gemini, with Groq as backup) | Low traffic, so free plans are plenty. No credit card means no surprise bills. |
 
 ## 3. How it works
@@ -77,7 +78,7 @@ my-own-website/
 ├── public/
 │   └── resume.pdf          ← downloadable resume
 └── src/
-    ├── data/contact.yaml   ← email, phone, GitHub, LinkedIn, resume link (edit here)
+    ├── data/config.yaml    ← all settings: contact links + chatbot (edit here)
     ├── data/resume.ts      ← jobs, projects, skills (edit here)
     ├── app/
     │   ├── globals.css     ← colors (accent lives here)
@@ -85,6 +86,44 @@ my-own-website/
     │   └── page.tsx        ← puts the sections together
     └── components/         ← sections + Terminal, StatusBar, TypedLines
 ```
+
+### Settings file: `config.yaml`
+
+All important settings live in **one YAML file**, `src/data/config.yaml`. YAML is a plain settings format of `name: value` lines. To change something, I edit a value and push, and the site updates in about 30 seconds. No code changes needed.
+
+Today this file is `contact.yaml`. When the chatbot is built, it gets renamed to `config.yaml` and grows a `chatbot` section.
+
+```yaml
+# Contact info and links shown on the site
+contact:
+  email: "sanjaysubb2006@gmail.com"
+  phone: "416-417-4309"
+  github: "https://github.com/Sanjay617"
+  linkedin: "https://www.linkedin.com/in/sanjay-subramanian-bb2615315/"
+  # resume: "/resume.pdf"          # uncomment once public/resume.pdf exists
+
+# Chatbot settings
+chatbot:
+  enabled: true                    # false = hide the AI, terminal still works
+  main:
+    provider: "gemini"
+    model: "<Gemini Flash-Lite model ID>"   # exact ID confirmed at build time
+  backup:
+    provider: "groq"
+    model: "<Groq model ID>"                # exact ID confirmed at build time
+  limits:
+    max_question_chars: 300        # longest question allowed
+    history_messages: 6            # how many past messages the AI remembers
+    per_visitor_per_hour: 10       # stops one person spamming
+    site_per_day: 500              # stays under the free daily allowance
+    max_answer_words: 300          # keeps answers short
+```
+
+**Rules for this file**
+
+- **No secrets in it.** The repo is public, so anyone can read this file. API keys (Gemini, Groq, Upstash) go in Vercel → Settings → Environment Variables only.
+- **Checked when the site builds.** If a value is missing or the wrong type (e.g. `per_visitor_per_hour: "ten"`), Vercel refuses to publish and names the bad line, instead of putting a broken site online.
+- **Resume content stays in `resume.ts`.** Jobs and projects are long lists with bullet points, which are easier to edit there. `config.yaml` is for settings and links.
 
 ## 7. Build steps
 
@@ -120,7 +159,7 @@ flowchart LR
         A["/api/chat"]
         V["1. Check input<br/>≤ 300 chars, last 6 messages"]
         R["2. Rate limit<br/>10/hour per visitor<br/>500/day whole site"]
-        P["3. Build instructions<br/>resume.ts + contact.yaml + about-me.md<br/>+ rules"]
+        P["3. Build instructions<br/>resume.ts + config.yaml + about-me.md<br/>+ rules"]
         AI["4. Ask the AI<br/>main → backup"]
     end
 
@@ -149,7 +188,8 @@ In plain words: the browser sends the question to my site's server. The server c
 | Vercel AI SDK | Free library that talks to Gemini, Groq, and others the same way | npm dependency |
 | Upstash Redis | Tiny free database that counts questions per visitor | Added through Vercel → Storage |
 | `about-me.md` | Extra facts not on the resume (interests, what I'm looking for) | `src/data/about-me.md` |
-| Secret keys | Gemini key, Groq key, Upstash keys | Vercel → Settings → Environment Variables (never in code) |
+| Settings | Models, limits, on/off switch | `config.yaml` → `chatbot` section (see section 6) |
+| Secret keys | Gemini key, Groq key, Upstash keys | Vercel → Settings → Environment Variables (never in code or `config.yaml`) |
 
 ### Why this design
 
@@ -180,6 +220,8 @@ In plain words: the browser sends the question to my site's server. The server c
 
 ### Limits
 
+These are the starting values. All of them can be changed in `config.yaml`.
+
 | Limit | Value | Protects against |
 |---|---|---|
 | Question length | 300 characters | Huge inputs eating the free allowance |
@@ -194,6 +236,7 @@ In plain words: the browser sends the question to my site's server. The server c
 |---|---|---|
 | 1. Get keys | Me (Sanjay) | Gemini key (Google AI Studio), Groq key, and Upstash Redis added in Vercel |
 | 2. Write `about-me.md` | Me (Sanjay), or Claude drafts it | Short file with extra facts |
+| 2b. `config.yaml` | Claude | `contact.yaml` renamed to `config.yaml` with a `chatbot` section, and the build fails clearly on bad values |
 | 3. `/api/chat` with backup switch | Claude | A question returns a streamed answer, and turning Gemini off makes Groq answer |
 | 4. Rate limits | Claude | The 11th question in an hour gets "slow down" |
 | 5. Terminal hookup | Claude | Typing a question in the terminal shows a streamed answer |
