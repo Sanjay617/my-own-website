@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 826 548" width="826" height="548" font-family="system-ui, -apple-system, Segoe UI, sans-serif">
+<style>
+:root, svg { --surface: #141414; --plot: #0a0a0a; --ink: #e5e5e5; --ink-2: #a3a3a3; --grid: #262626; --s1: #22d3ee; --s2: #eb6834; }
+.bg { fill: var(--surface); } .plot { fill: var(--plot); stroke: var(--grid); }
+.grid { stroke: var(--grid); stroke-width: 1; }
+.gate { stroke: var(--ink-2); stroke-width: 1.5; stroke-dasharray: 5 4; fill: none; }
+.head { fill: var(--ink); font-size: 16px; font-weight: 600; }
+.axis, .label { fill: var(--ink); font-size: 12px; }
+.tick, .small, .note { fill: var(--ink-2); font-size: 11px; }
+polyline { fill: none; stroke-linejoin: round; stroke-linecap: round; }
+.ours-thin { stroke: var(--s1); stroke-width: 1.3; stroke-opacity: 0.4; }
+.ours-med { stroke: var(--s1); stroke-width: 2.8; }
+.ppo-thin { stroke: var(--s2); stroke-width: 1.3; stroke-opacity: 0.4; }
+.ppo-med { stroke: var(--s2); stroke-width: 2.8; }
+.ours-dot { fill: var(--s1); fill-opacity: 0.45; } .ppo-dot { fill: var(--s2); fill-opacity: 0.45; }
+</style>
+<rect class="bg" width="826" height="548"/>
+<text class="head" x="78" y="28">Learning to walk: distance reached vs real steps</text>
+<text class="small" x="78" y="48">Thin: one seed. Thick: median across seeds (interpolated in log-x). Dashed: Gate 1 (10 m). Evaluation steps are not counted.</text>
+<g transform="translate(78,70)">
+<defs>
+<clipPath id="plotclip"><rect x="0" y="0" width="720" height="400"/></clipPath>
+</defs>
+<rect class="plot" x="0" y="0" width="720" height="400"/>
+<line class="grid" x1="0.0" y1="0" x2="0.0" y2="400"/>
+<text class="tick" x="0.0" y="416" text-anchor="middle">1k</text>
+<line class="grid" x1="144.0" y1="0" x2="144.0" y2="400"/>
+<text class="tick" x="144.0" y="416" text-anchor="middle">10k</text>
+<line class="grid" x1="288.0" y1="0" x2="288.0" y2="400"/>
+<text class="tick" x="288.0" y="416" text-anchor="middle">100k</text>
+<line class="grid" x1="432.0" y1="0" x2="432.0" y2="400"/>
+<text class="tick" x="432.0" y="416" text-anchor="middle">1M</text>
+<line class="grid" x1="576.0" y1="0" x2="576.0" y2="400"/>
+<text class="tick" x="576.0" y="416" text-anchor="middle">10M</text>
+<line class="grid" x1="720.0" y1="0" x2="720.0" y2="400"/>
+<text class="tick" x="720.0" y="416" text-anchor="middle">100M</text>
+<line class="grid" x1="0" y1="400.0" x2="720" y2="400.0"/>
+<text class="tick" x="-6" y="404.0" text-anchor="end">0</text>
+<line class="grid" x1="0" y1="333.3" x2="720" y2="333.3"/>
+<text class="tick" x="-6" y="337.3" text-anchor="end">2</text>
+<line class="grid" x1="0" y1="266.7" x2="720" y2="266.7"/>
+<text class="tick" x="-6" y="270.7" text-anchor="end">4</text>
+<line class="grid" x1="0" y1="200.0" x2="720" y2="200.0"/>
+<text class="tick" x="-6" y="204.0" text-anchor="end">6</text>
+<line class="grid" x1="0" y1="133.3" x2="720" y2="133.3"/>
+<text class="tick" x="-6" y="137.3" text-anchor="end">8</text>
+<line class="grid" x1="0" y1="66.7" x2="720" y2="66.7"/>
+<text class="tick" x="-6" y="70.7" text-anchor="end">10</text>
+<line class="grid" x1="0" y1="0.0" x2="720" y2="0.0"/>
+<text class="tick" x="-6" y="4.0" text-anchor="end">12</text>
+<line class="gate" x1="0" y1="66.7" x2="720" y2="66.7"/>
+<text class="note" x="6" y="60.7">10 m</text>
+<g clip-path="url(#plotclip)">
+<polyline class="ours-thin" points="144.0,391.1 187.3,400.0 212.7,364.7 230.7,327.7 244.7,348.8 256.1,355.9 265.7,66.4"/>
+<polyline class="ours-thin" points="144.0,396.5 187.3,387.4 212.7,342.0 230.7,339.5 244.7,88.2 256.1,66.5"/>
+<polyline class="ours-thin" points="144.0,390.0 187.3,377.5 212.7,378.1 230.7,259.0 244.7,321.5 256.1,182.4 265.7,66.5"/>
+<polyline class="ours-thin" points="144.0,400.0 187.3,368.6 212.7,399.3 230.7,383.0 244.7,264.9 256.1,66.7"/>
+<polyline class="ours-thin" points="144.0,400.0 187.3,399.5 212.7,346.7 230.7,364.3 244.7,338.7 256.1,66.4"/>
+<polyline class="ours-med" points="144.6,396.3 147.6,395.7 150.6,395.1 153.6,394.5 156.7,393.8 159.7,393.2 162.7,392.6 165.7,391.9 168.7,391.3 171.7,390.7 174.7,390.0 177.7,389.4 180.8,388.8 183.8,388.1 186.8,387.5 189.8,383.0 192.8,377.6 195.8,378.9 198.8,377.8 201.8,377.8 204.9,377.9 207.9,374.4 210.9,368.4 213.9,362.2 216.9,350.8 219.9,349.9 222.9,343.7 225.9,340.2 229.0,339.8 232.0,329.7 235.0,334.2 238.0,321.3 241.0,305.2 244.0,318.7 247.0,281.9 250.0,210.0 253.1,138.0 256.1,268.9 259.1,205.5 262.1,142.2 265.1,78.9"/>
+<polyline class="ppo-thin" points="432.0,367.7 475.3,352.3 500.7,387.5 518.7,387.1 532.7,384.3 544.1,366.3 553.7,363.6 562.0,95.1 569.4,66.5 576.0,66.3 582.0,66.2 587.4,66.3 592.4,66.3 597.0,66.1"/>
+<polyline class="ppo-thin" points="432.0,361.3 475.3,364.1 500.7,392.1 518.7,379.2 532.7,379.5 544.1,333.5 553.7,327.5 562.0,336.6 569.4,308.5 576.0,299.3 582.0,255.0 587.4,165.9 592.4,152.9 597.0,73.2 601.4,129.7 605.4,66.5 609.2,66.5 612.8,66.4 616.1,119.9 619.3,66.4 622.4,66.3"/>
+<polyline class="ppo-thin" points="432.0,365.5 475.3,379.1 500.7,378.1 518.7,365.9 532.7,370.5 544.1,373.5 553.7,357.1 562.0,136.7 569.4,66.5 576.0,66.5 582.0,66.1 587.4,66.1 592.4,66.3 597.0,66.3"/>
+<polyline class="ppo-thin" points="432.0,359.6 475.3,359.9 500.7,383.8 518.7,382.7 532.7,375.1 544.1,371.0 553.7,374.3 562.0,369.2 569.4,371.6 576.0,221.1 582.0,190.7 587.4,113.2 592.4,80.9 597.0,66.5 601.4,66.5 605.4,66.6 609.2,66.6 612.8,66.5 616.1,66.5"/>
+<polyline class="ppo-thin" points="432.0,361.8 475.3,369.9 500.7,378.5 518.7,350.3 532.7,378.4 544.1,132.5 553.7,66.4 562.0,66.3 569.4,66.5 576.0,66.2 582.0,66.4 587.4,157.7"/>
+<polyline class="ppo-med" points="433.8,362.1 436.8,362.7 439.8,363.3 442.8,363.8 445.9,362.7 448.9,362.4 451.9,362.6 454.9,362.8 457.9,363.0 460.9,363.2 463.9,363.4 466.9,363.6 470.0,363.8 473.0,364.0 476.0,364.8 479.0,368.2 482.0,371.5 485.0,373.2 488.0,374.2 491.0,375.2 494.1,378.3 497.1,380.4 500.1,383.2 503.1,383.6 506.1,383.5 509.1,383.3 512.1,383.1 515.1,381.7 518.2,379.6 521.2,379.2 524.2,379.3 527.2,378.1 530.2,376.5 533.2,374.9 536.2,371.4 539.2,372.2 542.3,369.1 545.3,365.9 548.3,365.1 551.3,361.2 554.3,340.8 557.3,261.3 560.3,181.9 563.3,124.3 566.4,95.6 569.4,66.8 572.4,66.5 575.4,66.5 578.4,66.3 581.4,66.4 584.4,107.9 587.4,89.6 590.5,79.9 593.5,71.9 596.5,67.3 599.5,85.9 602.5,89.1 605.5,66.6 608.5,66.6 611.5,66.5 614.6,80.7 617.6,96.0 620.6,66.4"/>
+</g>
+<text class="axis" x="360.0" y="436" text-anchor="middle">real simulator steps (log scale)</text>
+<text class="axis" transform="translate(-52,200.0) rotate(-90)" text-anchor="middle">mean walk-test distance (m)</text>
+<line class="ours-med" x1="0" y1="458" x2="28" y2="458"/>
+<text class="label" x="34" y="462">ours</text>
+<line class="ppo-med" x1="160" y1="458" x2="188" y2="458"/>
+<text class="label" x="194" y="462">PPO</text>
+<line class="gate" x1="320" y1="458" x2="348" y2="458"/>
+<text class="label" x="354" y="462">Gate 1 (10 m)</text>
+</g>
+</svg>

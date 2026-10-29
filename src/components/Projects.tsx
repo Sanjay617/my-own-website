@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { projects, type Project } from "@/data/resume";
 import Section from "./Section";
 
@@ -34,7 +35,11 @@ export default function Projects() {
     <Section id="projects" title="projects">
       <div className="grid gap-4 sm:grid-cols-2">
         {projects.map((p) =>
-          p.link ? (
+          p.link?.startsWith("/") ? (
+            <Link key={p.name} href={p.link} className={`${cardClass} ${linkedCardClass}`}>
+              <CardBody p={p} />
+            </Link>
+          ) : p.link ? (
             <a
               key={p.name}
               href={p.link}

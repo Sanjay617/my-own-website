@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { profile } from "@/data/resume";
 import type { Contact } from "@/data/config";
 
@@ -70,11 +71,10 @@ export function OpenTerminalButton({
   );
 }
 
-function scrollTo(id: string) {
-  document.getElementById(id)?.scrollIntoView();
-}
+// Scrolls to a home-page section, or goes to the home page first when on a sub-page.
+type GoTo = (id: string) => void;
 
-function execute(input: string, contact: Contact, chat: ChatSettings): Result {
+function execute(input: string, contact: Contact, chat: ChatSettings, scrollTo: GoTo): Result {
   const [rawCmd = "", ...args] = input.trim().split(/\s+/);
   const cmd = rawCmd.toLowerCase();
   const open = (url: string) => () => window.open(url, "_blank", "noopener,noreferrer");
@@ -143,6 +143,12 @@ export default function Terminal({ contact, chat }: { contact: Contact; chat: Ch
   const bottomRef = useRef<HTMLDivElement>(null);
   const returnFocus = useRef<HTMLElement | null>(null);
   const request = useRef<AbortController | null>(null);
+  const router = useRouter();
+  const goTo: GoTo = (id) => {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView();
+    else router.push(`/#${id}`);
+  };
 
   // Open via openTerminal() or the ` key (unless typing in a field).
   useEffect(() => {
@@ -231,7 +237,7 @@ export default function Terminal({ contact, chat }: { contact: Contact; chat: Ch
     setHistoryIndex(null);
     if (input.trim()) setHistory((h) => [...h, input]);
 
-    const result = execute(input, contact, chat);
+    const result = execute(input, contact, chat, goTo);
     if (result.clear) {
       setLines([]);
       setChatHistory([]);

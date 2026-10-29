@@ -70,6 +70,16 @@ export type Project = {
 
 export const projects: Project[] = [
   {
+    name: "World model: walking robot + robot brain",
+    date: "2026",
+    tech: ["C++20", "MuJoCo", "Python", "PyTorch", "π0.5"],
+    highlights: [
+      "From-scratch C++20 world model (own matrix maths and neural nets) teaches a simulated humanoid to walk with ~172× fewer real tries than PPO.",
+      "Camera-view redraw lifts π0.5 from 57% to 73% on moved-camera tasks; 4-bit π0.5 runs in 3.3 GB and scored no worse over 630 paired tries.",
+    ],
+    link: "/projects/world-model",
+  },
+  {
     name: "Offline Voice Assistant",
     date: "Jan 2026",
     tech: ["Python", "faster-whisper", "Ollama", "asyncio"],

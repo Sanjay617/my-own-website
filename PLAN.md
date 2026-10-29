@@ -76,16 +76,19 @@ flowchart TD
 my-own-website/
 ├── PLAN.md                 ← this file
 ├── public/
-│   └── resume.pdf          ← downloadable resume
+│   ├── resume.pdf          ← downloadable resume
+│   └── projects/world-model/ ← walking GIF + learning-curve chart
 └── src/
     ├── data/config.yaml    ← all settings: contact links + chatbot (edit here)
     ├── data/resume.ts      ← jobs, projects, skills (edit here)
     ├── data/about-me.md    ← extra facts for the chatbot (edit here)
+    ├── data/world-model.ts ← text and numbers for the world-model project page
     ├── lib/chat/           ← chatbot: prompt, AI + backup switch, rate limits
     ├── app/api/chat/       ← the /api/chat route
     ├── app/
     │   ├── globals.css     ← colors (accent lives here)
-    │   ├── layout.tsx      ← fonts, page title
+    │   ├── layout.tsx      ← fonts, page title, shared nav/footer/status bar/terminal
+    │   ├── projects/world-model/ ← /projects/world-model page
     │   └── page.tsx        ← puts the sections together
     └── components/         ← sections + Terminal, StatusBar, TypedLines
 ```
