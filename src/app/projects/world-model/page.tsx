@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Section from "@/components/Section";
 import { worldModel as wm, type Result, type Figure } from "@/data/world-model";
-import { contact } from "@/data/config";
+import { contact, chatbot } from "@/data/config";
 import { OpenTerminalButton } from "@/components/Terminal";
 
 export const metadata: Metadata = {
@@ -146,12 +146,14 @@ export default function WorldModelPage() {
           >
             email me
           </a>
-          <OpenTerminalButton
-            question="tell me more about the world model project"
-            className="rounded border border-border px-4 py-2 text-foreground transition hover:border-accent hover:text-accent"
-          >
-            ask the terminal
-          </OpenTerminalButton>
+          {chatbot.enabled && (
+            <OpenTerminalButton
+              question="tell me more about the world model project"
+              className="rounded border border-border px-4 py-2 text-foreground transition hover:border-accent hover:text-accent"
+            >
+              ask the terminal
+            </OpenTerminalButton>
+          )}
           <Link
             href="/#projects"
             className="rounded border border-border px-4 py-2 text-foreground transition hover:border-accent hover:text-accent"

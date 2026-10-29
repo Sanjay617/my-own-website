@@ -23,7 +23,7 @@ contact:
 
 # "Ask my resume" chatbot inside the terminal.
 chatbot:
-  enabled: true # false = hide the AI; the terminal still works
+  enabled: false # false = hide the AI; the terminal still works. Set true once the API keys are in Vercel.
 
   # Tried first. "gemini-flash-lite-latest" always points to Google's
   # newest Flash-Lite model, so retirements don't break the bot.
