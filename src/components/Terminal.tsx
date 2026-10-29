@@ -2,13 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { profile } from "@/data/resume";
+import { profile, experience, skills } from "@/data/resume";
 import type { Contact } from "@/data/config";
 
 const OPEN_EVENT = "terminal:open";
 const PROMPT = "guest@sanjbuilds:~$";
 const SECTIONS = ["experience", "projects", "skills", "contact"];
-const COMMANDS = ["help", "whoami", "ls", "cd", ...SECTIONS, "github", "linkedin", "email", "resume", "date", "echo", "ask", "clear", "exit"];
+const COMMANDS = ["help", "whoami", "ls", "cd", ...SECTIONS, "github", "linkedin", "email", "resume", "date", "echo", "neofetch", "ask", "clear", "exit"];
 
 export type ChatSettings = { enabled: boolean; maxQuestionChars: number; historyMessages: number };
 
@@ -22,6 +22,7 @@ function helpLines(chat: ChatSettings) {
         ]
       : []),
     "  whoami      who I am",
+    "  neofetch    me, at a glance",
     "  ls          list sections",
     "  cd <dir>    jump to a section (e.g. cd projects)",
     "  github      open my GitHub",
@@ -53,19 +54,22 @@ type Line = { kind: "in" | "out" | "ai"; text: string };
 type ChatMessage = { role: "user" | "assistant"; content: string };
 type Result = { output: string[]; clear?: boolean; close?: boolean; action?: () => void; ask?: string };
 
-export function openTerminal() {
-  window.dispatchEvent(new Event(OPEN_EVENT));
+/** Opens the terminal; with a question, asks the AI right away. */
+export function openTerminal(question?: string) {
+  window.dispatchEvent(new CustomEvent<string | undefined>(OPEN_EVENT, { detail: question }));
 }
 
 export function OpenTerminalButton({
   className,
   children,
+  question,
 }: {
   className?: string;
   children: React.ReactNode;
+  question?: string;
 }) {
   return (
-    <button type="button" onClick={openTerminal} className={className}>
+    <button type="button" onClick={() => openTerminal(question)} className={className}>
       {children}
     </button>
   );
@@ -74,7 +78,25 @@ export function OpenTerminalButton({
 // Scrolls to a home-page section, or goes to the home page first when on a sub-page.
 type GoTo = (id: string) => void;
 
-function execute(input: string, contact: Contact, chat: ChatSettings, scrollTo: GoTo): Result {
+function neofetch(repo: string) {
+  const latest = experience[0];
+  const rows: [string, string][] = [
+    ["name", profile.name],
+    ["role", profile.tagline],
+    ["school", `${profile.school} (${profile.graduation})`],
+    ["jobs", `${experience.length} (latest: ${latest.title} @ ${latest.company})`],
+    ["langs", skills.Languages.join(", ")],
+    ["site", "Next.js · TypeScript · Tailwind · Vercel"],
+    ["source", repo.replace(/^https?:\/\//, "")],
+  ];
+  return [
+    "  >_   guest@sanjbuilds",
+    "       ----------------",
+    ...rows.map(([k, v]) => `  ${k.padEnd(7)}${v}`),
+  ];
+}
+
+function execute(input: string, contact: Contact, chat: ChatSettings, scrollTo: GoTo, repo: string): Result {
   const [rawCmd = "", ...args] = input.trim().split(/\s+/);
   const cmd = rawCmd.toLowerCase();
   const open = (url: string) => () => window.open(url, "_blank", "noopener,noreferrer");
@@ -115,6 +137,8 @@ function execute(input: string, contact: Contact, chat: ChatSettings, scrollTo: 
       return { output: [new Date().toString()] };
     case "echo":
       return { output: [args.join(" ")] };
+    case "neofetch":
+      return { output: neofetch(repo) };
     case "sudo":
       return { output: ["nice try. this incident will be reported."] };
     case "clear":
@@ -131,7 +155,7 @@ function execute(input: string, contact: Contact, chat: ChatSettings, scrollTo: 
   }
 }
 
-export default function Terminal({ contact, chat }: { contact: Contact; chat: ChatSettings }) {
+export default function Terminal({ contact, chat, repo }: { contact: Contact; chat: ChatSettings; repo: string }) {
   const [open, setOpen] = useState(false);
   const [lines, setLines] = useState<Line[]>(() => welcomeLines(chat));
   const [value, setValue] = useState("");
@@ -143,6 +167,8 @@ export default function Terminal({ contact, chat }: { contact: Contact; chat: Ch
   const bottomRef = useRef<HTMLDivElement>(null);
   const returnFocus = useRef<HTMLElement | null>(null);
   const request = useRef<AbortController | null>(null);
+  // The open-event listener is set up once, so it calls the latest run() via this ref.
+  const runRef = useRef<(input: string) => void>(() => {});
   const router = useRouter();
   const goTo: GoTo = (id) => {
     const el = document.getElementById(id);
@@ -152,9 +178,11 @@ export default function Terminal({ contact, chat }: { contact: Contact; chat: Ch
 
   // Open via openTerminal() or the ` key (unless typing in a field).
   useEffect(() => {
-    const show = () => {
+    const show = (e?: Event) => {
       returnFocus.current = document.activeElement as HTMLElement | null;
       setOpen(true);
+      const question = e instanceof CustomEvent ? e.detail : undefined;
+      if (typeof question === "string") runRef.current(question);
     };
     const onKey = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement;
@@ -229,15 +257,11 @@ export default function Terminal({ contact, chat }: { contact: Contact; chat: Ch
     }
   };
 
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
+  // Runs a typed line, or a sample question clicked on the page.
+  const run = (input: string) => {
     if (busy) return;
-    const input = value;
-    setValue("");
-    setHistoryIndex(null);
     if (input.trim()) setHistory((h) => [...h, input]);
-
-    const result = execute(input, contact, chat, goTo);
+    const result = execute(input, contact, chat, goTo, repo);
     if (result.clear) {
       setLines([]);
       setChatHistory([]);
@@ -247,6 +271,18 @@ export default function Terminal({ contact, chat }: { contact: Contact; chat: Ch
     if (result.close) close();
     result.action?.();
     if (result.ask) void ask(result.ask);
+  };
+  useEffect(() => {
+    runRef.current = run;
+  });
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (busy) return;
+    const input = value;
+    setValue("");
+    setHistoryIndex(null);
+    run(input);
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {

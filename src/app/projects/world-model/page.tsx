@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import Section from "@/components/Section";
-import { worldModel as wm, type Result } from "@/data/world-model";
+import { worldModel as wm, type Result, type Figure } from "@/data/world-model";
+import { contact } from "@/data/config";
+import { OpenTerminalButton } from "@/components/Terminal";
 
 export const metadata: Metadata = {
   title: wm.title,
@@ -16,7 +18,7 @@ function ResultCard({ r, children }: { r: Result; children?: React.ReactNode }) 
     <article className={card}>
       <p className="font-mono text-2xl text-accent tabular-nums">{r.headline}</p>
       <h3 className="mt-1 font-semibold">{r.title}</h3>
-      <p className="mt-3 text-sm text-foreground/90">{r.text}</p>
+      <p className="mt-3 text-[15px] text-foreground/90">{r.text}</p>
       {r.caveat && (
         <p className="mt-3 border-l-2 border-border pl-3 text-sm text-muted">{r.caveat}</p>
       )}
@@ -25,9 +27,27 @@ function ResultCard({ r, children }: { r: Result; children?: React.ReactNode }) 
   );
 }
 
+function FigureImage({ f, priority }: { f: Figure; priority?: boolean }) {
+  return (
+    <figure>
+      {/* unoptimized: an animated WebP and an SVG gain nothing from resizing */}
+      <Image
+        src={f.src}
+        alt={f.alt}
+        width={f.width}
+        height={f.height}
+        unoptimized
+        priority={priority}
+        className="h-auto w-full rounded-md border border-border bg-background"
+      />
+      <figcaption className="mt-2 font-mono text-xs text-muted">{f.caption}</figcaption>
+    </figure>
+  );
+}
+
 function Bullets({ items, muted }: { items: React.ReactNode[]; muted?: boolean }) {
   return (
-    <ul className={`space-y-3 text-sm ${muted ? "text-muted" : "text-foreground/90"}`}>
+    <ul className={`space-y-3 text-[15px] ${muted ? "text-muted" : "text-foreground/90"}`}>
       {items.map((item, i) => (
         <li key={i} className="flex gap-3">
           <span className="font-mono text-accent">&gt;</span>
@@ -62,6 +82,9 @@ export default function WorldModelPage() {
             view on github →
           </a>
         )}
+        <div className="mt-8 sm:max-w-md">
+          <FigureImage f={wm.clip} priority />
+        </div>
         <dl className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-4">
           {wm.stats.map((s) => (
             <div key={s.value} className="rounded-lg border border-border bg-surface p-4">
@@ -79,7 +102,7 @@ export default function WorldModelPage() {
             <article key={p.title} className={card}>
               <p className="font-mono text-xs text-accent">{p.label}</p>
               <h3 className="mt-1 font-semibold">{p.title}</h3>
-              <p className="mt-2 text-sm text-foreground/90">{p.text}</p>
+              <p className="mt-2 text-[15px] text-foreground/90">{p.text}</p>
             </article>
           ))}
         </div>
@@ -88,21 +111,8 @@ export default function WorldModelPage() {
       <Section id="results" title="results">
         <div className="space-y-4">
           <ResultCard r={wm.walking}>
-            <div className="mt-5 grid gap-4 sm:grid-cols-[0.85fr_1.15fr]">
-              {wm.figures.map((f) => (
-                <figure key={f.src}>
-                  {/* unoptimized: an animated GIF and an SVG gain nothing from resizing */}
-                  <Image
-                    src={f.src}
-                    alt={f.alt}
-                    width={f.width}
-                    height={f.height}
-                    unoptimized
-                    className="h-auto w-full rounded-md border border-border bg-background"
-                  />
-                  <figcaption className="mt-2 font-mono text-xs text-muted">{f.caption}</figcaption>
-                </figure>
-              ))}
+            <div className="mt-5">
+              <FigureImage f={wm.chart} />
             </div>
           </ResultCard>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -125,6 +135,30 @@ export default function WorldModelPage() {
 
       <Section id="limits" title="honest limits">
         <Bullets items={wm.limits} muted />
+      </Section>
+
+      <Section id="next" title="what next">
+        <p className="text-foreground/90">Questions about this project, or want to work together?</p>
+        <div className="mt-6 flex flex-wrap gap-3 font-mono text-sm">
+          <a
+            href={`mailto:${contact.email}`}
+            className="rounded border border-accent bg-accent px-4 py-2 text-background transition hover:opacity-90"
+          >
+            email me
+          </a>
+          <OpenTerminalButton
+            question="tell me more about the world model project"
+            className="rounded border border-border px-4 py-2 text-foreground transition hover:border-accent hover:text-accent"
+          >
+            ask the terminal
+          </OpenTerminalButton>
+          <Link
+            href="/#projects"
+            className="rounded border border-border px-4 py-2 text-foreground transition hover:border-accent hover:text-accent"
+          >
+            other projects
+          </Link>
+        </div>
       </Section>
     </main>
   );

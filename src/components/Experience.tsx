@@ -15,7 +15,7 @@ export default function Experience() {
               <p className="font-mono text-xs text-muted">{job.dates}</p>
             </div>
             <p className="text-sm text-muted">{job.location}</p>
-            <ul className="mt-3 space-y-2 text-sm text-foreground/90">
+            <ul className="mt-3 space-y-2 text-[15px] text-foreground/90">
               {job.highlights.map((h) => (
                 <li key={h} className="flex gap-2">
                   <span className="text-accent" aria-hidden="true">

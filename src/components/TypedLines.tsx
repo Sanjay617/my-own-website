@@ -7,35 +7,60 @@ export type TypedLine = {
   as?: "p" | "h1";
   className?: string;
   prefix?: string; // shown instantly when the line starts, like a shell prompt
-  pause?: number; // ms to wait before typing this line
+  pause?: number; // ms to wait before this line starts
   speed?: number; // ms per character
+  instant?: boolean; // print the whole line at once, like a command's output
 };
 
-// Types lines out one after another like a terminal session, then fades in
-// `children`. Untyped text stays in the layout (invisible) so nothing jumps,
-// and screen readers get each full line immediately.
-export default function TypedLines({
-  lines,
-  children,
-}: {
-  lines: TypedLine[];
-  children?: React.ReactNode;
-}) {
+/** Fired once when the typing finishes on a first visit (StatusBar listens). */
+export const HERO_DONE_EVENT = "hero:done";
+const SEEN_KEY = "hero-typed";
+
+function seenThisSession() {
+  try {
+    return sessionStorage.getItem(SEEN_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+// Types lines out one after another like a terminal session. Untyped text
+// stays in the layout (invisible) so nothing jumps, and screen readers get
+// each full line immediately. Any click, key, or scroll finishes it, and it
+// doesn't replay on later visits in the same browser session.
+export default function TypedLines({ lines }: { lines: TypedLine[] }) {
   const [pos, setPos] = useState({ line: 0, char: 0 });
   const done = pos.line >= lines.length;
 
   useEffect(() => {
     if (done) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const skip = reduce || seenThisSession();
     const current = lines[pos.line];
-    const delay = reduce ? 0 : pos.char === 0 ? (current.pause ?? 0) : (current.speed ?? 50);
+    const delay = skip ? 0 : pos.char === 0 ? (current.pause ?? 0) : current.instant ? 0 : (current.speed ?? 50);
     const id = setTimeout(() => {
-      if (reduce) setPos({ line: lines.length, char: 0 });
+      if (skip) setPos({ line: lines.length, char: 0 });
       else if (pos.char >= current.text.length) setPos({ line: pos.line + 1, char: 0 });
-      else setPos({ line: pos.line, char: pos.char + 1 });
+      else setPos({ line: pos.line, char: current.instant ? current.text.length : pos.char + 1 });
     }, delay);
     return () => clearTimeout(id);
   }, [pos, done, lines]);
+
+  useEffect(() => {
+    if (done) return;
+    const finish = () => setPos({ line: lines.length, char: 0 });
+    const events = ["keydown", "pointerdown", "wheel", "touchstart", "scroll"] as const;
+    events.forEach((e) => window.addEventListener(e, finish, { passive: true }));
+    return () => events.forEach((e) => window.removeEventListener(e, finish));
+  }, [done, lines.length]);
+
+  useEffect(() => {
+    if (!done || seenThisSession()) return;
+    try {
+      sessionStorage.setItem(SEEN_KEY, "1");
+    } catch {}
+    window.dispatchEvent(new Event(HERO_DONE_EVENT));
+  }, [done]);
 
   return (
     <>
@@ -62,15 +87,6 @@ export default function TypedLines({
           </Tag>
         );
       })}
-      <div
-        className={
-          done
-            ? "visible opacity-100 transition-[opacity,visibility] duration-700"
-            : "invisible opacity-0"
-        }
-      >
-        {children}
-      </div>
     </>
   );
 }

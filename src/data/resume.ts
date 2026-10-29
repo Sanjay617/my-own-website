@@ -1,4 +1,4 @@
-// Resume content for the site. Contact info and links live in contact.yaml.
+// Resume content for the site. Contact info, links, and settings live in config.yaml.
 
 export const profile = {
   name: "Sanjay Subramanian",
@@ -6,6 +6,10 @@ export const profile = {
   education: "Bachelor of Mathematics in AI, Minor in Computer Science",
   school: "University of Waterloo",
   graduation: "Expected April 2029",
+  // One line of proof under the hero, after "N software roles ·".
+  highlight: "built a world model that learns to walk with ~172× fewer real tries",
+  // Clickable examples under the hero that open the terminal and ask the AI.
+  sampleQuestions: ["has he used kubernetes?", "what did he build at macaca ai?", "how do i contact him?"],
 };
 
 export type Job = {
@@ -65,7 +69,10 @@ export type Project = {
   tech: string[];
   highlights: string[];
   // Optional: add a public repo or demo URL to make the card clickable.
+  // Links starting with "/" are pages on this site and open in the same tab.
   link?: string;
+  // Optional: a full-width card with a picture, for the top project.
+  featured?: { image: string; alt: string };
 };
 
 export const projects: Project[] = [
@@ -78,6 +85,10 @@ export const projects: Project[] = [
       "Camera-view redraw lifts π0.5 from 57% to 73% on moved-camera tasks; 4-bit π0.5 runs in 3.3 GB and scored no worse over 630 paired tries.",
     ],
     link: "/projects/world-model",
+    featured: {
+      image: "/projects/world-model/mbpo_walk.webp",
+      alt: "The simulated humanoid walking forward",
+    },
   },
   {
     name: "Offline Voice Assistant",
@@ -96,6 +107,16 @@ export const projects: Project[] = [
       "Full CRUD with AG Grid editable tables and real-time validation, cutting data entry errors by 25%.",
       "JWT auth with bcrypt hashing for 100+ accounts with row-level data isolation.",
     ],
+  },
+  {
+    name: "This website",
+    date: "2026",
+    tech: ["Next.js", "TypeScript", "Tailwind", "Vercel AI SDK", "Upstash Redis"],
+    highlights: [
+      "Terminal-style portfolio with an AI chatbot that answers questions about me, streamed word by word.",
+      "Chat API validates input, rate limits per visitor and per site in Redis, and fails over from Gemini to Groq before the first word.",
+    ],
+    link: "https://github.com/Sanjay617/my-own-website",
   },
 ];
 

@@ -75,9 +75,10 @@ flowchart TD
 ```
 my-own-website/
 ├── PLAN.md                 ← this file
+├── next.config.ts          ← security headers
 ├── public/
 │   ├── resume.pdf          ← downloadable resume
-│   └── projects/world-model/ ← walking GIF + learning-curve chart
+│   └── projects/world-model/ ← walking clip (WebP) + learning-curve chart
 └── src/
     ├── data/config.yaml    ← all settings: contact links + chatbot (edit here)
     ├── data/resume.ts      ← jobs, projects, skills (edit here)
@@ -89,6 +90,9 @@ my-own-website/
     │   ├── globals.css     ← colors (accent lives here)
     │   ├── layout.tsx      ← fonts, page title, shared nav/footer/status bar/terminal
     │   ├── projects/world-model/ ← /projects/world-model page
+    │   ├── opengraph-image.tsx, icon.svg, apple-icon.tsx ← link-preview card and tab/home-screen icons
+    │   ├── sitemap.ts, robots.ts, llms.txt/ ← for search engines and AI search tools
+    │   ├── not-found.tsx   ← terminal-style "page not found"
     │   └── page.tsx        ← puts the sections together
     └── components/         ← sections + Terminal, StatusBar, TypedLines
 ```

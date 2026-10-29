@@ -5,15 +5,21 @@
 # NO SECRETS HERE: this repo is public. API keys go in Vercel →
 # Settings → Environment Variables (and .env.local on your laptop).
 
+# The site's public address. Used for link previews, the sitemap, and
+# Google. Change it if the domain changes.
+site:
+  url: "https://www.sanjbuilds.com"
+  repo: "https://github.com/Sanjay617/my-own-website"
+
 # Contact info and links shown on the site. Keep values in quotes.
 contact:
   email: "sanjaysubb2006@gmail.com"
   phone: "416-417-4309"
   github: "https://github.com/Sanjay617"
   linkedin: "https://www.linkedin.com/in/sanjay-subramanian-bb2615315/"
-  # Optional. Put the PDF at public/resume.pdf, then uncomment this line
-  # to show the Resume button and enable the `resume` terminal command.
-  # resume: "/resume.pdf"
+  # Shows the Resume button and enables the `resume` terminal command.
+  # Replace public/resume.pdf to update it; comment this out to hide it.
+  resume: "/resume.pdf"
 
 # "Ask my resume" chatbot inside the terminal.
 chatbot:

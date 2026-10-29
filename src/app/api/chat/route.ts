@@ -2,7 +2,7 @@
 // Order: check input → rate limit → ask the AI (main, then backup) → stream text.
 // Every reply is plain text so the terminal can show it as-is.
 import { z } from "zod";
-import { chatbot, contact } from "@/data/config";
+import { site, chatbot, contact } from "@/data/config";
 import { checkLimits, visitorId } from "@/lib/chat/ratelimit";
 import { streamAnswer } from "@/lib/chat/answer";
 
@@ -30,8 +30,19 @@ function reply(status: number, message: string) {
   });
 }
 
+// Only this site's own pages may use the chatbot, so other websites can't
+// spend its free daily allowance. Browsers send these headers on every
+// fetch; a script that fakes them still hits the per-visitor limit.
+function fromThisSite(request: Request) {
+  const fetchSite = request.headers.get("sec-fetch-site");
+  if (fetchSite) return fetchSite === "same-origin";
+  const origin = request.headers.get("origin");
+  return !origin || origin === new URL(request.url).origin;
+}
+
 export async function POST(request: Request) {
   if (!chatbot.enabled) return reply(404, "The chatbot is turned off.");
+  if (!fromThisSite(request)) return reply(403, `The chatbot only answers on ${new URL(site.url).host}.`);
 
   const parsed = body.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return reply(400, "That request didn't look right. Try asking again.");

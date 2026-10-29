@@ -10,6 +10,10 @@ const count = z.number().int().positive();
 const provider = z.object({ provider: z.enum(["gemini", "groq"]), model: text });
 
 const schema = z.object({
+  site: z.object({
+    url: z.url(),
+    repo: z.url(),
+  }),
   contact: z.object({
     email: text,
     phone: text,
@@ -33,6 +37,7 @@ const schema = z.object({
 });
 
 export type Config = z.infer<typeof schema>;
+export type Site = Config["site"];
 export type Contact = Config["contact"];
 export type Chatbot = Config["chatbot"];
 export type ProviderConfig = Chatbot["main"];
@@ -48,4 +53,4 @@ if (!parsed.success) {
   throw new Error(`src/data/config.yaml has problems:\n${problems}`);
 }
 
-export const { contact, chatbot } = parsed.data;
+export const { site, contact, chatbot } = parsed.data;

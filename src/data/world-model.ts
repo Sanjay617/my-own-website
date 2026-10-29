@@ -28,8 +28,8 @@ export const worldModel = {
   lede:
     "A neural network that predicts what happens next, written from scratch in C++20 (own matrix maths and neural nets, no Eigen), teaches a simulated 1.66 m humanoid to walk with far fewer real tries. A second part builds helpers around π0.5, a large robot \"brain\" that turns camera images and a sentence into arm motions.",
   tech: ["C++20", "MuJoCo", "Python", "PyTorch", "π0.5", "GitHub Actions"],
-  // Set to the repo URL once it is public; the link is hidden while this is undefined.
-  repo: undefined as string | undefined,
+  // "view on github" link; set to undefined to hide it.
+  repo: "https://github.com/Sanjay617/world-model" as string | undefined,
 
   stats: [
     { value: "~172×", label: "fewer real tries to learn to walk than PPO" },
@@ -62,22 +62,23 @@ export const worldModel = {
       "Honest caveat: the learner inside MBPO (SAC) is already ~61× better than PPO on its own; the world model adds ~2.7× on top. PPO is still faster in wall-clock hours.",
   } satisfies Result,
 
-  figures: [
-    {
-      src: "/projects/world-model/mbpo_walk.gif",
-      alt: "The simulated humanoid walking forward",
-      caption: "The learned controller walking 18 m in 30 s.",
-      width: 360,
-      height: 270,
-    },
-    {
-      src: "/projects/world-model/race.svg",
-      alt: "Learning curves: MBPO reaches the walking goal with far fewer real steps than PPO",
-      caption: "Real steps needed until each run first walked.",
-      width: 826,
-      height: 548,
-    },
-  ] satisfies Figure[],
+  // Shown at the top of the page.
+  clip: {
+    src: "/projects/world-model/mbpo_walk.webp",
+    alt: "The simulated humanoid walking forward",
+    caption: "The learned controller walking 18 m in 30 s.",
+    width: 360,
+    height: 270,
+  } satisfies Figure,
+
+  // Shown with the walking result.
+  chart: {
+    src: "/projects/world-model/race.svg",
+    alt: "Learning curves: MBPO reaches the walking goal with far fewer real steps than PPO",
+    caption: "Real steps needed until each run first walked.",
+    width: 826,
+    height: 548,
+  } satisfies Figure,
 
   brainResults: [
     {

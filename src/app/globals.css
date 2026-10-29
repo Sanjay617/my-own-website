@@ -61,3 +61,31 @@ body::before {
     animation: none;
   }
 }
+
+/* Visible outline on whatever has keyboard focus (Tab key), never on mouse clicks. */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* One gentle nudge on the terminal button after the hero finishes typing. */
+@keyframes nudge {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+  50% {
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-accent) 45%, transparent);
+  }
+}
+
+.nudge {
+  animation: nudge 1.2s ease-in-out 2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nudge {
+    animation: none;
+  }
+}
